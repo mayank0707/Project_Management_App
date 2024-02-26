@@ -9,7 +9,8 @@ function App() {
   const [projectsState, setProjectsState] = useState(
     {
       selectedProjectId: undefined,
-      projects: []
+      projects: [],
+      tasks: []
     }
   );
 
@@ -55,9 +56,49 @@ function App() {
     });
   }
 
+  function handleDeleteProject(){
+    setProjectsState((prevState)=>{
+      return {
+        ...prevState,
+        selectedProjectId: undefined,
+        projects : prevState.projects.filter((project)=> project.id !== prevState.selectedProjectId)
+      };
+    });
+  }
+
+  function handleAddTask(text){
+    setProjectsState(prevState =>{
+      const newTask = {
+        text: text,
+        projectId: prevState.selectedProjectId,
+        id: Math.random()
+      };
+
+      return {
+        ...prevState,
+        tasks : [newTask, ...prevState.tasks]
+      };
+    });
+  }
+
+  function handleDeleteTask(id){
+    setProjectsState((prevState)=>{
+      return {
+        ...prevState,
+        tasks : prevState.tasks.filter((task)=> task.id !== id)
+      };
+    });
+  }
+
   const selectedProject = projectsState.projects.find(project => project.id === projectsState.selectedProjectId);
 
-  let content = <SelectedProject project={selectedProject}/>;
+  let content = <SelectedProject 
+                    project={selectedProject} 
+                    onDelete={handleDeleteProject}
+                    onAddTask={handleAddTask}
+                    onDeleteTask={handleDeleteTask}
+                    tasks= {projectsState.tasks}
+                />;
 
   if(projectsState.selectedProjectId === null){
     content = <NewProject onAdd={handleAddProject} onCancel={handleCancelProject}></NewProject>;
@@ -68,7 +109,7 @@ function App() {
   return (
     <main className="h-screen flex gap-8">
       <ProjectSidebar onStartAddProject ={handleStartAddProject} projects={projectsState.projects}
-      onSelectProject={handleSelectProject}></ProjectSidebar>
+      onSelectProject={handleSelectProject} selectedProjectId={projectsState.selectedProjectId}></ProjectSidebar>
       {content}
     </main>
   );
